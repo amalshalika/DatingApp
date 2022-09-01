@@ -16,7 +16,7 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor(private accountService:AccountService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    if(request.url.includes('/api/account/login')) {
+    if(request.url.includes('/api/account/login') || request.url.includes('/api/account/register')) {
       return next.handle(request);
     }
     let currentUser: User;

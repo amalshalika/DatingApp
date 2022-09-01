@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../_services/account.service';
 
@@ -9,22 +11,46 @@ import { AccountService } from '../_services/account.service';
 })
 export class RegisterComponent implements OnInit {
 
-  model: any = {};
   @Output() cancelRegister = new EventEmitter();
-  constructor(private accountService: AccountService, private toastr:ToastrService) { }
+  registerForm: FormGroup;
+  maxDate = new Date();
+  validationError: string[] = [];
+  constructor(private accountService: AccountService, private toastr: ToastrService, 
+    private router:Router, private fb:FormBuilder) { }
 
   ngOnInit(): void {
+    this.maxDate.setFullYear(this.maxDate.getFullYear() - 18);
+    this.initializeForm();
   }
+  initializeForm() {
+    this.registerForm = this.fb.group({
+      username: ['', Validators.required],
+      gender: ['male'],
+      knownAs: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      city: ['', Validators.required],
+      country: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(8)]],
+      confirmPassword: ['', [Validators.required, this.matchValues('password')]]
+    });
 
+
+    this.registerForm.controls.password.valueChanges.subscribe(() =>
+    this.registerForm.controls.confirmPassword.updateValueAndValidity())
+  }
+  matchValues(matchTo: string): ValidatorFn {
+    return (control: AbstractControl) =>
+      control?.value === control?.parent?.controls[matchTo].value
+        ? null : { isMatching: true };
+
+  }
   register() {
-    this.accountService.register(this.model).subscribe({
+    this.accountService.register(this.registerForm.value).subscribe({
       next: rel => {
-        console.log(rel);
-        this.cancel();
+        this.router.navigateByUrl('/members');
       },
       error: err => {
-        console.log(err);
-        this.toastr.error(err.error);
+        this.validationError = err;
       } 
     })
   }
