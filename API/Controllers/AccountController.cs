@@ -41,7 +41,13 @@ namespace API.Controllers
             user.PasswordSalt = hmac.Key;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return new UserDto() { Username = user.UserName, Token = _tokenService.CraeteToken(user), KnownAs = user.KnownAs };
+            return new UserDto() 
+            { 
+                Username = user.UserName, 
+                Token = _tokenService.CraeteToken(user), 
+                KnownAs = user.KnownAs, 
+                Gender=user.Gender 
+            };
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
@@ -61,7 +67,8 @@ namespace API.Controllers
                 Username = user.UserName,
                 Token = _tokenService.CraeteToken(user),
                 PhotoUrl = user.Photos.FirstOrDefault(rel => rel.IsMain)?.Url,
-                KnownAs = user.KnownAs
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
             };
         }
         private async Task<bool> UserExists(string username)

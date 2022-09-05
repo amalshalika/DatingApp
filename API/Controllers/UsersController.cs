@@ -1,6 +1,7 @@
 ﻿using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -27,10 +28,18 @@ namespace API.Controllers
             _photoService = photoService;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+        public async Task<ActionResult<PagedList<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
         {
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUserName());
+            userParams.CurrentUserName = user.UserName;
+            if(string.IsNullOrEmpty(userParams.Gender))
+            {
+                userParams.Gender = userParams.Gender == "male" ? "female" : "male";
+            }
+            var usersToReturn = await _userRepository.GetMembersAsync(userParams);
 
-            var usersToReturn = await _userRepository.GetMembersAsync();
+            Response.AddPaginationHeader(usersToReturn.CurrentPage,usersToReturn.PageSize,
+                usersToReturn.TotalCount, usersToReturn.TotalPages);
             return Ok(usersToReturn);
         }
         [HttpGet("{username}",Name = "GetUserByName")]
