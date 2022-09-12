@@ -8,6 +8,7 @@ import { User } from '../_models/user';
 import { UserParams } from '../_models/userParams';
 import { AccountService } from './account.service';
 import {take} from 'rxjs'
+import { LikedUserParams } from '../_models/likedUserParams';
 
 @Injectable({
   providedIn: 'root'
@@ -53,7 +54,6 @@ export class MembersService {
         return response;
       }));
   }
-
   getMember(username: string) {
     const member = [...this.memberCache.values()]
     .reduce((arr, elem) => arr.concat(elem.result),[])
@@ -78,6 +78,21 @@ export class MembersService {
   }
   deletePhoto(photoId: number) {
     return this.httpClient.delete(`${this.baseUrl}users/delete-photo/${photoId}`);
+  }
+  addLike(username: string) {
+    return this.httpClient.post(`${this.baseUrl}likes/${username}`,{});
+  }
+  getLikes(likeUserParams:LikedUserParams) {
+    let params = this.getPaginationHeader(likeUserParams.pageNumber,likeUserParams.pageSize);
+    params = params.append('predicate',likeUserParams.predicate);
+
+    return this.getPaginatedResult<Partial<Member[]>>(this.baseUrl + 'likes', params)
+    .pipe(map(response => {
+      return response;
+    }));
+
+
+    // return this.httpClient.get<Partial<Member[]>>(`${this.baseUrl}likes?predicate=${predicate}`);
   }
   private getPaginatedResult<T>(url, params: HttpParams) {
     const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
