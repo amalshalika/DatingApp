@@ -9,6 +9,8 @@ import { MemberDetailComponent } from './members/member-detail/member-detail.com
 import { MemberEditComponent } from './members/member-edit/member-edit.component';
 import { MemberListComponent } from './members/member-list/member-list.component';
 import { MessagesComponent } from './messages/messages.component';
+import { AdminPanelComponent } from './_admin/admin-panel/admin-panel.component';
+import { AdminGuard } from './_guard/admin.guard';
 import { AuthGuard } from './_guard/auth.guard';
 import { PreventUnsavedChangesGuard } from './_guard/prevent-unsaved-changes.guard';
 import { MemberDetailsResolver } from './_resolvers/member-details.resolver';
@@ -18,6 +20,7 @@ const routes: Routes = [
   {
     path: '', runGuardsAndResolvers: 'always', canActivate: [AuthGuard],
     children: [
+      { path: 'admin', component: AdminPanelComponent, canActivate:[AdminGuard]},
       { path: 'members', component: MemberListComponent},
       { path: 'members/:username', component: MemberDetailComponent,resolve: {member: MemberDetailsResolver} },
       { path: 'member/edit', component: MemberEditComponent, canDeactivate:[PreventUnsavedChangesGuard] },
