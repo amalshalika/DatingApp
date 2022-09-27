@@ -1,5 +1,7 @@
 using API.Data;
+using API.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -23,10 +25,12 @@ namespace API
             try
             {
                 var context = services.GetRequiredService<DataContext>();
+                var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
                 var migrator = context.Database.GetService<IMigrator>();
                 await migrator.MigrateAsync();
 
-                await Seed.SeedUsers(context);
+                await Seed.SeedUsers(userManager,roleManager);
             }
             catch (Exception ex)
             {
